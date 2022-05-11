@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:html2md/html2md.dart' as html2md;
 import 'package:share_plus/share_plus.dart';
@@ -36,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const platform = MethodChannel("com.sanzoghenzo/readability");
   final TextEditingController _controller = TextEditingController();
   late StreamSubscription _intentDataStreamSubscription;
   String url = "";
@@ -142,19 +144,20 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-}
 
-Future<String> url2md(String url) async {
-  try {
-    String html = await http.read(Uri.parse(url));
-    return html2md.convert(html, styleOptions: {
-      "headingStyle": "atx",
-      "hr": "---",
-      "bulletListMarker": "-",
-      "codeBlockStyle": "fenced",
-    });
-  } catch (e) {
-    Fluttertoast.showToast(msg: "$e");
-    return "";
+  Future<String> url2md(String url) async {
+    try {
+      String html = await http.read(Uri.parse(url));
+      String? readable = await platform.invokeMethod<String>("makeReadable", {"html":html, "url":url});
+      return html2md.convert(readable!, styleOptions: {
+        "headingStyle": "atx",
+        "hr": "---",
+        "bulletListMarker": "-",
+        "codeBlockStyle": "fenced",
+      });
+    } catch (e) {
+      Fluttertoast.showToast(msg: "$e");
+      return "";
+    }
   }
 }
