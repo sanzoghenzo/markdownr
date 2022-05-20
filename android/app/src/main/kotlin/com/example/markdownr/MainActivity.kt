@@ -15,8 +15,8 @@ class MainActivity: FlutterActivity() {
             "com.sanzoghenzo/readability"
         ).setMethodCallHandler { call, result ->
             if (call.method == "makeReadable") {
-                val html: String = call.argument<String>("html")
-                val url: String = call.argument<String>("url")
+                val html: String? = call.argument<String>("html")
+                val url: String? = call.argument<String>("url")
                 val readableHtml = makeReadable(html, url)
                 result.success(readableHtml)
             } else {
