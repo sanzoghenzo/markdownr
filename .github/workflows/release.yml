@@ -1,19 +1,17 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [master]
-    paths-ignore:
-      - '**/README.md'
-  pull_request:
-    branches: [master]
-
-  workflow_dispatch:
+    tags:
+      - '*'
 
 jobs:
-  test:
-    name: flutter build
+  release:
+    name: release apk
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -23,7 +21,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "2.10.4"
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/*.apk"
       - run: flutter pub get
       - run: flutter analyze
-      # TODO: enable when tests are in place
-      # - run: flutter test
+      - run: flutter build apk --release
