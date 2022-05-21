@@ -21,9 +21,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "2.10.4"
-      - uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/app/outputs/flutter-apk/*.apk"
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter build apk --release
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/*.apk"
