@@ -111,7 +111,9 @@ class _MyHomePageState extends State<MyHomePage> {
             onSelected: (int result) {
               switch (result) {
                 case 1:
-                  setState(() {includeSourceLink = !includeSourceLink;});
+                  setState(() {
+                    includeSourceLink = !includeSourceLink;
+                  });
                   setIncludeSourceLink(includeSourceLink);
                   break;
               }
