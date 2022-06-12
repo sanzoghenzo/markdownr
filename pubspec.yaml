@@ -10,7 +10,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.4
   html2md: ^1.2.5
-  share_plus: ^4.0.3
+  share_plus: ^4.0.7
   receive_sharing_intent: ^1.4.5
   fluttertoast: ^8.0.9
 
