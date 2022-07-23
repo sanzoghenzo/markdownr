@@ -7,6 +7,7 @@ import 'package:html2md/html2md.dart' as html2md;
 import 'package:share_plus/share_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,6 +43,17 @@ class _MyHomePageState extends State<MyHomePage> {
   late StreamSubscription _intentDataStreamSubscription;
   String url = "";
   String markdown = "";
+  bool includeSourceLink = true;
+
+  Future<bool> getIncludeSourceLink() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool("includeSourceLink") ?? true;
+  }
+
+  setIncludeSourceLink(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("includeSourceLink", value);
+  }
 
   void _convert() async {
     var md = await url2md(url);
@@ -79,6 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
         fromIntent(value);
       }
     });
+
+    getIncludeSourceLink().then((value) => includeSourceLink = value);
   }
 
   @override
@@ -92,6 +106,29 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          PopupMenuButton<int>(
+            onSelected: (int result) {
+              switch (result) {
+                case 1:
+                  setState(() {
+                    includeSourceLink = !includeSourceLink;
+                  });
+                  setIncludeSourceLink(includeSourceLink);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<int>(
+                child: CheckedPopupMenuItem(
+                  checked: includeSourceLink,
+                  value: 1,
+                  child: const Text("Include URL"),
+                ),
+              )
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -148,13 +185,18 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<String> url2md(String url) async {
     try {
       String html = await http.read(Uri.parse(url));
-      String? readable = await platform.invokeMethod<String>("makeReadable", {"html":html, "url":url});
-      return html2md.convert(readable!, styleOptions: {
+      Map<Object?, Object?>? readableResults = await platform
+          .invokeMethod("makeReadable", {"html": html, "url": url});
+      var title = readableResults!["title"] as String;
+      var readable = readableResults["html"] as String;
+      String markdown = html2md.convert(readable, styleOptions: {
         "headingStyle": "atx",
         "hr": "---",
         "bulletListMarker": "-",
         "codeBlockStyle": "fenced",
       });
+      var link = await getIncludeSourceLink() ? "\nClipped from: $url\n" : "";
+      return "# $title\n$link\n$markdown";
     } catch (e) {
       Fluttertoast.showToast(msg: "$e");
       return "";
