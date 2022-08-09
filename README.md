@@ -10,10 +10,11 @@ I've written this app to save articles I found interesting to a note taking app 
 
 ## Features
 
-- Downloads the web page specified in the URL input field, cleans it up with (like readability does) and converts it to Markdown
-- Share the markdown to other apps with standard share intent
+- Downloads the web page specified in the URL input field, cleans it up with (like readability does) and converts it to Markdown.
+- Share the markdown to other apps with standard share intent.
 - The URL can be also be shared from another app (for example the web browser);
   markdownr will automatically convert it and show the share intent.
+- If something isn't working with the share button, you can use the copy button to send the text to the clipboard.
 
 ## Developer info
 

@@ -1,0 +1,1 @@
+Added the "COPY" button to send the text to the clipboard in case the share button doesn't work.
