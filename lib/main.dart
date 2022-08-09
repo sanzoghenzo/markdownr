@@ -66,6 +66,13 @@ class _MyHomePageState extends State<MyHomePage> {
     Share.share(markdown);
   }
 
+  void _toClipboard() {
+    Clipboard.setData(ClipboardData(text: markdown)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Copied to your clipboard!')));
+    });
+  }
+
   void fromIntent(String value) async {
     _controller.text = value;
     var md = await url2md(value);
@@ -172,6 +179,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: markdown.isNotEmpty ? _share : null,
                     child: const Text('SHARE'),
+                  ),
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: markdown.isNotEmpty ? _toClipboard : null,
+                    child: const Text('COPY'),
                   ),
                 ],
               ),
