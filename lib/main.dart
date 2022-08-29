@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -199,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> url2md(String url) async {
     try {
-      String html = await http.read(Uri.parse(url));
+      String html = utf8.decode(await http.readBytes(Uri.parse(url)));
       Map<Object?, Object?>? readableResults = await platform
           .invokeMethod("makeReadable", {"html": html, "url": url});
       var title = readableResults!["title"] as String;
