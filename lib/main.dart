@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
       url = value;
       markdown = md;
     });
-    if (markdown.isNotEmpty){
+    if (markdown.isNotEmpty) {
       Share.share(markdown);
     }
   }
@@ -260,7 +260,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ? "## Excerpt\n\n> $excerpt\n\n"
           : "";
       return "$frontMatter# $title\n\n$link$excerptString$markdown";
-
     } catch (e) {
       Fluttertoast.showToast(msg: "$e");
       return "";
