@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,15 +46,18 @@ class _MyHomePageState extends State<MyHomePage> {
   String url = "";
   String markdown = "";
   bool includeSourceLink = true;
+  bool includeFrontMatter = true;
+  bool includeExcerpt = true;
 
-  Future<bool> getIncludeSourceLink() async {
+  Future<bool> getSettings(String settingName,
+      {bool defaultValue = false}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool("includeSourceLink") ?? true;
+    return prefs.getBool(settingName) ?? defaultValue;
   }
 
-  setIncludeSourceLink(bool value) async {
+  setSettings(String name, bool value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool("includeSourceLink", value);
+    prefs.setBool(name, value);
   }
 
   void _convert() async {
@@ -81,7 +85,9 @@ class _MyHomePageState extends State<MyHomePage> {
       url = value;
       markdown = md;
     });
-    Share.share(markdown);
+    if (markdown.isNotEmpty){
+      Share.share(markdown);
+    }
   }
 
   @override
@@ -100,7 +106,10 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    getIncludeSourceLink().then((value) => includeSourceLink = value);
+    getSettings("includeSourceLink").then((value) => includeSourceLink = value);
+    getSettings("includeFrontMatter")
+        .then((value) => includeFrontMatter = value);
+    getSettings("includeExcerpt").then((value) => includeExcerpt = value);
   }
 
   @override
@@ -120,18 +129,44 @@ class _MyHomePageState extends State<MyHomePage> {
               switch (result) {
                 case 1:
                   setState(() {
+                    includeFrontMatter = !includeFrontMatter;
+                  });
+                  setSettings("includeFrontMatter", includeFrontMatter);
+                  break;
+                case 2:
+                  setState(() {
                     includeSourceLink = !includeSourceLink;
                   });
-                  setIncludeSourceLink(includeSourceLink);
+                  setSettings("includeSourceLink", includeSourceLink);
+                  break;
+                case 3:
+                  setState(() {
+                    includeExcerpt = !includeExcerpt;
+                  });
+                  setSettings("includeExcerpt", includeExcerpt);
                   break;
               }
             },
             itemBuilder: (context) => [
               PopupMenuItem<int>(
                 child: CheckedPopupMenuItem(
-                  checked: includeSourceLink,
+                  checked: includeFrontMatter,
                   value: 1,
-                  child: const Text("Include URL"),
+                  child: const Text("Include front matter"),
+                ),
+              ),
+              PopupMenuItem<int>(
+                child: CheckedPopupMenuItem(
+                  checked: includeSourceLink,
+                  value: 2,
+                  child: const Text("Include URL in content"),
+                ),
+              ),
+              PopupMenuItem<int>(
+                child: CheckedPopupMenuItem(
+                  checked: includeExcerpt,
+                  value: 3,
+                  child: const Text("Include Excerpt"),
                 ),
               )
             ],
@@ -205,14 +240,27 @@ class _MyHomePageState extends State<MyHomePage> {
           .invokeMethod("makeReadable", {"html": html, "url": url});
       var title = readableResults!["title"] as String;
       var readable = readableResults["html"] as String;
+      var author = readableResults["author"] as String;
+      var excerpt = readableResults["excerpt"] as String;
       String markdown = html2md.convert(readable, styleOptions: {
         "headingStyle": "atx",
         "hr": "---",
         "bulletListMarker": "-",
         "codeBlockStyle": "fenced",
       });
-      var link = await getIncludeSourceLink() ? "\nClipped from: $url\n" : "";
-      return "# $title\n$link\n$markdown";
+      var dateFmt = DateFormat("yyyy-MM-ddThh:mm:ss");
+      var formattedDate = dateFmt.format(DateTime.now());
+      var frontMatter = await getSettings("includeFrontMatter")
+          ? "---\ncreated: $formattedDate\nsource: $url\nauthor: $author\n---\n\n"
+          : "";
+      var link = await getSettings("includeSourceLink")
+          ? "Clipped from: $url\n\n"
+          : "";
+      var excerptString = await getSettings("includeExcerpt")
+          ? "## Excerpt\n\n> $excerpt\n\n"
+          : "";
+      return "$frontMatter# $title\n\n$link$excerptString$markdown";
+
     } catch (e) {
       Fluttertoast.showToast(msg: "$e");
       return "";

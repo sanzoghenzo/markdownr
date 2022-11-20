@@ -7,7 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 import net.dankito.readability4j.extended.Readability4JExtended
 
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -18,24 +18,27 @@ class MainActivity: FlutterActivity() {
             if (call.method == "makeReadable") {
                 val html: String? = call.argument<String>("html")
                 val url: String? = call.argument<String>("url")
-                val (title, readableHtml) = makeReadable(html, url)
-                val arguments = HashMap<String, String>()
-                arguments["title"] = title
-                arguments["html"] = readableHtml
-                result.success(arguments)
+                val results = makeReadable(html, url)
+                result.success(results)
             } else {
                 result.notImplemented()
             }
         }
     }
 
-    private fun makeReadable(html: String?, url: String?): Pair<String, String> {
-        if (html == null || url == null) {
-            return Pair("", "")
-        }
+    private val noReturnData = mapOf(
+        "title" to "", "html" to "", "author" to "", "excerpt" to ""
+    )
+
+    private fun makeReadable(html: String?, url: String?): Map<String, String> {
+        if (html == null || url == null) return noReturnData
         val readabilityService = Readability4JExtended(url, html)
         val article = readabilityService.parse()
-        if (article.content != null) return Pair(article.title!!, article.content!!)
-        return Pair("", "")
+        return mapOf(
+            "title" to (article.title ?: ""),
+            "html" to (article.content ?: ""),
+            "author" to (article.byline ?: ""),
+            "excerpt" to (article.excerpt ?: "")
+        )
     }
 }
