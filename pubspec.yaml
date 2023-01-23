@@ -14,7 +14,7 @@ dependencies:
   share_plus: ^6.3.0
   receive_sharing_intent: ^1.4.5
   fluttertoast: ^8.1.1
-  shared_preferences: ^2.0.15
+  shared_preferences: ^2.0.17
 
 dev_dependencies:
   flutter_test:
