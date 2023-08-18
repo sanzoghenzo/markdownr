@@ -26,16 +26,17 @@ class ObsidianSettingsPage extends StatefulWidget {
   final ObsidianSettings settings;
   final Function(ObsidianSettings) onSave;
 
-  ObsidianSettingsPage({
+  const ObsidianSettingsPage({
+    super.key,
     required this.settings,
     required this.onSave,
   });
 
   @override
-  _ObsidianSettingsPageState createState() => _ObsidianSettingsPageState();
+  ObsidianSettingsPageState createState() => ObsidianSettingsPageState();
 }
 
-class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
+class ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
   late ObsidianSettings currentSettings;
 
   @override
@@ -48,10 +49,10 @@ class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Obsidian Settings'),
+        title: const Text('Obsidian Settings'),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: const Icon(Icons.save),
             onPressed: () {
               widget.onSave(currentSettings);
               Navigator.of(context).pop();
@@ -60,7 +61,7 @@ class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
         ],
       ),
       body: ListView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         children: [
           DropdownButton<String>(
             value: currentSettings.mode,
@@ -80,7 +81,7 @@ class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
             }).toList(),
           ),
           SwitchListTile(
-            title: Text('Use Daily Note'),
+            title: const Text('Use Daily Note'),
             value: currentSettings.daily,
             onChanged: (newValue) {
               setState(() {
@@ -89,7 +90,7 @@ class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
             },
           ),
           SwitchListTile(
-            title: Text('Use Clipboard Content'),
+            title: const Text('Use Clipboard Content'),
             value: currentSettings.clipboard,
             onChanged: (newValue) {
               setState(() {
@@ -98,14 +99,14 @@ class _ObsidianSettingsPageState extends State<ObsidianSettingsPage> {
             },
           ),
           TextField(
-            decoration: InputDecoration(labelText: 'Heading'),
+            decoration: const InputDecoration(labelText: 'Heading'),
             onChanged: (value) {
               currentSettings.heading = value;
             },
             controller: TextEditingController(text: currentSettings.heading),
           ),
           TextField(
-            decoration: InputDecoration(labelText: 'Filepath'),
+            decoration: const InputDecoration(labelText: 'Filepath'),
             onChanged: (value) {
               currentSettings.filepath = value;
             },
