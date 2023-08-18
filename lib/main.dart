@@ -10,6 +10,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'obsidian_settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +50,15 @@ class _MyHomePageState extends State<MyHomePage> {
   bool includeFrontMatter = true;
   bool includeExcerpt = true;
 
+  ObsidianSettings obsidianSettings = ObsidianSettings(
+    vaultName: 'default-vault',
+    filepath: '',
+    mode: 'append',
+    daily: false,
+    clipboard: false,
+    heading: '',
+  );
+
   Future<bool> getSettings(String settingName,
       {bool defaultValue = false}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -82,6 +92,19 @@ class _MyHomePageState extends State<MyHomePage> {
   void _shareToObsidian() {
     String obsidianUri = generateObsidianURI(markdown);
     Share.share(obsidianUri);
+  }
+
+  void _openObsidianSettings() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ObsidianSettingsPage(
+        settings: obsidianSettings,
+        onSave: (updatedSettings) {
+          setState(() {
+            obsidianSettings = updatedSettings;
+          });
+        },
+      ),
+    ));
   }
 
   void _toClipboard() {
@@ -137,6 +160,10 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _openObsidianSettings,
+          ),
           PopupMenuButton<int>(
             onSelected: (int result) {
               switch (result) {
