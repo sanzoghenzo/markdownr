@@ -73,12 +73,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String generate_obsidian_uri(String markdown) {
     // URI encoding
-    String encoded_markdown = markdown.replaceAll(' ', '%20').replaceAll('\n', '%0A');
+    String encoded_markdown =
+        markdown.replaceAll(' ', '%20').replaceAll('\n', '%0A');
     // Construct the URI (assuming the vault name is "default-vault")
     return 'obsidian://advanced-uri?vault=default-vault&daily=false&data=$encoded_markdown&mode=append';
-}  
+  }
 
-void _shareToObsidian() {
+  void _shareToObsidian() {
     String obsidianUri = generate_obsidian_uri(markdown);
     Share.share(obsidianUri);
   }
@@ -237,7 +238,7 @@ void _shareToObsidian() {
                     child: const Text('COPY'),
                   ),
                 ],
-              ),   
+              ),
               Column(
                 children: <Widget>[
                   ElevatedButton(
