@@ -71,6 +71,18 @@ class _MyHomePageState extends State<MyHomePage> {
     Share.share(markdown);
   }
 
+  String generate_obsidian_uri(String markdown) {
+    // URI encoding
+    String encoded_markdown = markdown.replaceAll(' ', '%20').replaceAll('\n', '%0A');
+    // Construct the URI (assuming the vault name is "default-vault")
+    return 'obsidian://advanced-uri?vault=default-vault&daily=false&data=$encoded_markdown&mode=append';
+}  
+
+void _shareToObsidian() {
+    String obsidianUri = generate_obsidian_uri(markdown);
+    Share.share(obsidianUri);
+  }
+
   void _toClipboard() {
     Clipboard.setData(ClipboardData(text: markdown)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -225,6 +237,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('COPY'),
                   ),
                 ],
+              ),   
+              Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: markdown.isNotEmpty ? _shareToObsidian : null,
+                    child: const Text('SHARE TO OBSIDIAN'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -232,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-a
+
   Future<String> url2md(String url) async {
     try {
       String html = utf8.decode(await http.readBytes(Uri.parse(url)));
