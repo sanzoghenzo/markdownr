@@ -71,16 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
     Share.share(markdown);
   }
 
-  String generate_obsidian_uri(String markdown) {
+  String generateObsidianURI(String markdown) {
     // URI encoding
-    String encoded_markdown =
+    String encodedMarkdown =
         markdown.replaceAll(' ', '%20').replaceAll('\n', '%0A');
     // Construct the URI (assuming the vault name is "default-vault")
-    return 'obsidian://advanced-uri?vault=default-vault&daily=false&data=$encoded_markdown&mode=append';
+    return 'obsidian://advanced-uri?vault=default-vault&daily=false&data=$encodedMarkdown&mode=append';
   }
 
   void _shareToObsidian() {
-    String obsidianUri = generate_obsidian_uri(markdown);
+    String obsidianUri = generateObsidianURI(markdown);
     Share.share(obsidianUri);
   }
 
