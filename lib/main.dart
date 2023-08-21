@@ -58,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
     filepath: '',
     mode: 'append',
     daily: false,
-    clipboard: false,
     heading: '',
   );
 
@@ -94,22 +93,36 @@ class _MyHomePageState extends State<MyHomePage> {
     }).join('');
   }
 
-  String generateObsidianURIWithoutData([String? filepath = 'Untitled']) {
-    
-    String finalFilepath = Uri.encodeComponent(
-        filepath ?? "Clipped from Markdownr on ${DateTime.now().toString()}");
-    String sanitizedPath = sanitizeFilename(finalFilepath, "-");
+  String generateObsidianURI() {
+    // Start constructing the Obsidian advanced URI.
+    List<String> parameters = [];
 
-    // Construct the URI without the data part but with clipboard=true
-    // return 'obsidian://advanced-uri?vault=Android&filepath=$sanitizedPath&clipboard=true';
-    return 'obsidian://advanced-uri?vault=Android&clipboard=true&mode=new&filepath=$sanitizedPath';
+    parameters.add('vault=${obsidianSettings.vaultName}');
+    parameters.add('mode=${obsidianSettings.mode}');
+    parameters.add('clipboard=true');
+
+    if (obsidianSettings.daily) {
+      parameters.add('daily=true');
+    }
+
+    if (obsidianSettings.heading != null &&
+        obsidianSettings.heading!.isNotEmpty) {
+      parameters.add('heading=${Uri.encodeFull(obsidianSettings.heading!)}');
+    }
+
+    if (obsidianSettings.filepath.isNotEmpty) {
+      parameters.add(
+          'filepath=${Uri.encodeFull(sanitizeFilename(obsidianSettings.filepath))}');
+    }
+
+    return 'obsidian://advanced-uri?${parameters.join('&')}';
   }
 
   void _shareToObsidian() async {
     _toClipboard();
 
-    // Generate the Obsidian URI without the data part
-    String obsidianUri = generateObsidianURIWithoutData();
+    // Generate the Obsidian URI using the function
+    String obsidianUri = generateObsidianURI();
 
     if (Platform.isAndroid) {
       final intent = AndroidIntent(
@@ -119,8 +132,10 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       await intent.launch();
     } else {
+      // Currently, only Android is supported. This can be expanded in the future.
       // print("Platform not supported.");
     }
+    _toClipboard(markdown, false);
   }
 
   void _openObsidianSettings() {
@@ -136,12 +151,14 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
   }
 
-  void _toClipboard() {
-    Clipboard.setData(ClipboardData(text: markdown)).then((_) {
+void _toClipboard([String? text, bool showToast = true]) {
+  Clipboard.setData(ClipboardData(text: text ?? markdown)).then((_) {
+    if (showToast) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Copied to your clipboard!')));
-    });
-  }
+    }
+  });
+}
 
   void fromIntent(String value) async {
     _controller.text = value;
@@ -175,6 +192,13 @@ class _MyHomePageState extends State<MyHomePage> {
     getSettings("includeFrontMatter")
         .then((value) => includeFrontMatter = value);
     getSettings("includeExcerpt").then((value) => includeExcerpt = value);
+
+    // Load persisted Obsidian settings
+    ObsidianSettings.load().then((loadedSettings) {
+      setState(() {
+        obsidianSettings = loadedSettings;
+      });
+    });
   }
 
   @override
