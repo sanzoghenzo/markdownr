@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'obsidian_settings.dart';
+
+import 'package:android_intent/android_intent.dart';
 
 void main() {
   runApp(const MyApp());
@@ -81,17 +84,43 @@ class _MyHomePageState extends State<MyHomePage> {
     Share.share(markdown);
   }
 
-  String generateObsidianURI(String markdown) {
-    // URI encoding
-    String encodedMarkdown =
-        markdown.replaceAll(' ', '%20').replaceAll('\n', '%0A');
-    // Construct the URI (assuming the vault name is "default-vault")
-    return 'obsidian://advanced-uri?vault=default-vault&daily=false&data=$encodedMarkdown&mode=append';
+  String sanitizeFilename(String filename, [String substitutionChar = '_']) {
+    const invalidChars = r'\/:*?<>|';
+    return filename.split('').map((char) {
+      if (invalidChars.contains(char)) {
+        return substitutionChar;
+      }
+      return char;
+    }).join('');
   }
 
-  void _shareToObsidian() {
-    String obsidianUri = generateObsidianURI(markdown);
-    Share.share(obsidianUri);
+  String generateObsidianURIWithoutData([String? filepath]) {
+    String finalFilepath = Uri.encodeComponent(
+        filepath ?? "Clipped from Markdownr on ${DateTime.now().toString()}");
+    String sanitizedPath = sanitizeFilename(finalFilepath, "-");
+
+    // Construct the URI without the data part but with clipboard=true
+    return 'obsidian://advanced-uri?vault=Android&filepath=$sanitizedPath&clipboard=true&mode=new';
+  }
+
+  void _shareToObsidian() async {
+    _toClipboard();
+
+    // Generate the Obsidian URI without the data part
+    String obsidianUri = generateObsidianURIWithoutData();
+
+    print("Generated Obsidian URI: $obsidianUri");
+
+    if (Platform.isAndroid) {
+      final intent = AndroidIntent(
+        action: 'action_view',
+        data: obsidianUri,
+        package: 'com.obsidian',
+      );
+      await intent.launch();
+    } else {
+      print("Platform not supported.");
+    }
   }
 
   void _openObsidianSettings() {
@@ -121,9 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
       url = value;
       markdown = md;
     });
-    if (markdown.isNotEmpty) {
-      Share.share(markdown);
-    }
+    // if (markdown.isNotEmpty) {
+    //   Share.share(markdown);
+    // }
   }
 
   @override

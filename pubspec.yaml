@@ -15,7 +15,7 @@ dependencies:
   receive_sharing_intent: ^1.4.5
   fluttertoast: ^8.1.1
   shared_preferences: ^2.0.15
-
+  android_intent: ^2.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
