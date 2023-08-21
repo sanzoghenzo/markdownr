@@ -94,13 +94,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }).join('');
   }
 
-  String generateObsidianURIWithoutData([String? filepath]) {
+  String generateObsidianURIWithoutData([String? filepath = 'Untitled']) {
+    
     String finalFilepath = Uri.encodeComponent(
         filepath ?? "Clipped from Markdownr on ${DateTime.now().toString()}");
     String sanitizedPath = sanitizeFilename(finalFilepath, "-");
 
     // Construct the URI without the data part but with clipboard=true
-    return 'obsidian://advanced-uri?vault=Android&filepath=$sanitizedPath&clipboard=true&mode=new';
+    // return 'obsidian://advanced-uri?vault=Android&filepath=$sanitizedPath&clipboard=true';
+    return 'obsidian://advanced-uri?vault=Android&clipboard=true&mode=new&filepath=$sanitizedPath';
   }
 
   void _shareToObsidian() async {
@@ -109,13 +111,11 @@ class _MyHomePageState extends State<MyHomePage> {
     // Generate the Obsidian URI without the data part
     String obsidianUri = generateObsidianURIWithoutData();
 
-    print("Generated Obsidian URI: $obsidianUri");
-
     if (Platform.isAndroid) {
       final intent = AndroidIntent(
-        action: 'action_view',
+        action: 'android.intent.action.VIEW',
         data: obsidianUri,
-        package: 'com.obsidian',
+        package: 'md.obsidian',
       );
       await intent.launch();
     } else {
