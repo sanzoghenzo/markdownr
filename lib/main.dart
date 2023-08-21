@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       await intent.launch();
     } else {
-      print("Platform not supported.");
+      // print("Platform not supported.");
     }
   }
 
