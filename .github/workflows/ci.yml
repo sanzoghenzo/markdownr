@@ -2,17 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['*']
     paths-ignore:
       - '**/README.md'
-  pull_request:
-    branches: [main]
+      - 'metadata/**/*'
+  # pull_request:
+  #   branches: [main]
 
   workflow_dispatch:
 
 jobs:
   test:
-    name: flutter build
+    name: flutter analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
