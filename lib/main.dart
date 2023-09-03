@@ -273,10 +273,10 @@ class _MyHomePageState extends State<MyHomePage> {
     var rawBytes = response.bodyBytes;
     try {
       return utf8.decode(rawBytes);
-    } catch (_) { }
+    } catch (_) {}
     try {
       return (await CharsetDetector.autoDecode(rawBytes)).string;
-    } catch (_) { }
+    } catch (_) {}
     if (response.headers.containsKey("content-type")) {
       String ct = response.headers["content-type"]!;
       if (ct.contains("charset")) {

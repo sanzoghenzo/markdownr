@@ -2,17 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['*']
     paths-ignore:
       - '**/README.md'
-  pull_request:
-    branches: [main]
+      - 'metadata/**/*'
+  # pull_request:
+  #   branches: [main]
 
   workflow_dispatch:
 
 jobs:
   test:
-    name: flutter build
+    name: flutter analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,9 +23,9 @@ jobs:
           java-version: "11"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.12.2"
+          flutter-version: "3.13.2"
       - run: flutter pub get
-      - run: flutter format --set-exit-if-changed .
+      - run: dart format --set-exit-if-changed .
       - run: flutter analyze
       # TODO: enable when tests are in place
       # - run: flutter test
