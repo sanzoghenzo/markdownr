@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:charset_converter/charset_converter.dart';
+import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -235,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> url2md(String url) async {
     try {
-      String html = utf8.decode(await http.readBytes(Uri.parse(url)));
+      String html = await _getHtmlText(url);
       Map<Object?, Object?>? readableResults = await platform
           .invokeMethod("makeReadable", {"html": html, "url": url});
       var title = readableResults!["title"] as String;
@@ -264,5 +266,24 @@ class _MyHomePageState extends State<MyHomePage> {
       Fluttertoast.showToast(msg: "$e");
       return "";
     }
+  }
+
+  Future<String> _getHtmlText(String url) async {
+    var response = await http.get(Uri.parse(url));
+    var rawBytes = response.bodyBytes;
+    try {
+      return utf8.decode(rawBytes);
+    } catch (_) { }
+    try {
+      return (await CharsetDetector.autoDecode(rawBytes)).string;
+    } catch (_) { }
+    if (response.headers.containsKey("content-type")) {
+      String ct = response.headers["content-type"]!;
+      if (ct.contains("charset")) {
+        var charset = ct.split("charset=")[1];
+        return await CharsetConverter.decode(charset, rawBytes);
+      }
+    }
+    throw Exception("Could not get text from the specified URL");
   }
 }
