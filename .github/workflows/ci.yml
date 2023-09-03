@@ -22,7 +22,7 @@ jobs:
           java-version: "11"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.12.2"
+          flutter-version: "3.13.2"
       - run: flutter pub get
       - run: flutter format --set-exit-if-changed .
       - run: flutter analyze
