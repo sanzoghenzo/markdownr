@@ -132,10 +132,10 @@ packages:
     dependency: "direct main"
     description:
       name: fluttertoast
-      sha256: "7a738eddad04c7b27a1ecfecd12e8ecd4b188cdd2d91c252a02a4aba65838c9d"
+      sha256: "474f7d506230897a3cd28c965ec21c5328ae5605fc9c400cd330e9e9d6ac175c"
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.1.1"
+    version: "8.2.2"
   html:
     dependency: transitive
     description:
