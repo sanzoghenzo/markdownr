@@ -25,7 +25,7 @@ jobs:
         with:
           flutter-version: "3.13.2"
       - run: flutter pub get
-      - run: flutter format --set-exit-if-changed .
+      - run: dart format --set-exit-if-changed .
       - run: flutter analyze
       # TODO: enable when tests are in place
       # - run: flutter test
