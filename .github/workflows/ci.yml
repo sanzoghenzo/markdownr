@@ -27,5 +27,4 @@ jobs:
       - run: flutter pub get
       - run: dart format --set-exit-if-changed .
       - run: flutter analyze
-      # TODO: enable when tests are in place
-      # - run: flutter test
+      - run: flutter test
