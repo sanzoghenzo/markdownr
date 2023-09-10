@@ -113,7 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
     getSettings("includeFrontMatter")
         .then((value) => includeFrontMatter = value);
     getSettings("includeExcerpt").then((value) => includeExcerpt = value);
-    getSettings("includeBody", defaultValue: true).then((value) => includeBody = value);
+    getSettings("includeBody", defaultValue: true)
+        .then((value) => includeBody = value);
   }
 
   @override
@@ -259,14 +260,14 @@ class _MyHomePageState extends State<MyHomePage> {
       var readable = readableResults["html"] as String;
       var author = readableResults["author"] as String;
       var excerpt = readableResults["excerpt"] as String;
-      var markdown = await getSettings("includeBody") ?
-        html2md.convert(readable, styleOptions: {
-          "headingStyle": "atx",
-          "hr": "---",
-          "bulletListMarker": "-",
-          "codeBlockStyle": "fenced",
-        })
-        : "";
+      var markdown = await getSettings("includeBody")
+          ? html2md.convert(readable, styleOptions: {
+              "headingStyle": "atx",
+              "hr": "---",
+              "bulletListMarker": "-",
+              "codeBlockStyle": "fenced",
+            })
+          : "";
       var dateFmt = DateFormat("yyyy-MM-ddThh:mm:ss");
       var formattedDate = dateFmt.format(DateTime.now());
       var frontMatter = await getSettings("includeFrontMatter")
