@@ -1,17 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:charset_converter/charset_converter.dart';
-import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:html2md/html2md.dart' as html2md;
-import 'package:share_plus/share_plus.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:markdownr/converter.dart';
+import 'package:markdownr/httpclient.dart';
+import 'package:markdownr/notifications.dart';
+import 'package:markdownr/readability.dart';
+import 'package:markdownr/settings.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,68 +26,73 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Markdownr'),
+      home: const HomePage(title: 'Markdownr'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  static const platform = MethodChannel("com.sanzoghenzo/readability");
+class _HomePageState extends State<HomePage> {
   final TextEditingController _controller = TextEditingController();
   late StreamSubscription _intentDataStreamSubscription;
   String url = "";
   String markdown = "";
-  bool includeSourceLink = true;
-  bool includeFrontMatter = true;
-  bool includeExcerpt = true;
+  bool includeSourceLink = false;
+  bool includeFrontMatter = false;
+  bool includeExcerpt = false;
   bool includeBody = true;
+  late final Url2MdConverter _url2MdConverter;
+  late final SettingsRepository _settingsRepository;
 
-  Future<bool> getSettings(String settingName,
-      {bool defaultValue = false}) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var retrievedValue = prefs.getBool(settingName);
-    if (retrievedValue == null) {
-      prefs.setBool(settingName, defaultValue);
-      return defaultValue;
-    }
-    return retrievedValue;
-  }
+  _HomePageState();
 
-  setSettings(String name, bool value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(name, value);
-  }
+  @override
+  void initState() {
+    super.initState();
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen(fromIntent, onError: (err) {
+      Fluttertoast.showToast(msg: "Error receiving the intent: $err");
+    });
 
-  void _convert() async {
-    var md = await url2md(url);
-    setState(() {
-      markdown = md;
+    ReceiveSharingIntent.getInitialText().then((String? value) async {
+      if (value != null && value.isNotEmpty) {
+        fromIntent(value);
+      }
+    });
+
+    repoFactory().then((repo){
+      _settingsRepository = repo;
+      _url2MdConverter = Url2MdConverter(
+          httpClient: const DefaultHttpClient(),
+          settingsRepository: _settingsRepository,
+          notificationService: const DefaultNotificationService(),
+          readabilityService: DefaultReadabilityService()
+      );
+      includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
+      includeSourceLink = _settingsRepository.getBool("includeSourceLink");
+      includeExcerpt = _settingsRepository.getBool("includeExcerpt");
+      includeBody =
+        _settingsRepository.getBool("includeBody", defaultValue: true);
     });
   }
 
-  void _share() {
-    Share.share(markdown);
-  }
-
-  void _toClipboard() {
-    Clipboard.setData(ClipboardData(text: markdown)).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Copied to your clipboard!')));
-    });
+  @override
+  void dispose() {
+    _intentDataStreamSubscription.cancel();
+    super.dispose();
   }
 
   void fromIntent(String value) async {
     _controller.text = value;
-    var md = await url2md(value);
+    var md = await _url2MdConverter.convert(url: value);
     setState(() {
       url = value;
       markdown = md;
@@ -99,70 +103,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen(fromIntent, onError: (err) {
-      Fluttertoast.showToast(msg: "Error receiving the intent: $err");
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String? value) async {
-      if (value != null && value.isNotEmpty) {
-        fromIntent(value);
-      }
-    });
-
-    getSettings("includeSourceLink").then((value) => includeSourceLink = value);
-    getSettings("includeFrontMatter")
-        .then((value) => includeFrontMatter = value);
-    getSettings("includeExcerpt").then((value) => includeExcerpt = value);
-    getSettings("includeBody", defaultValue: true)
-        .then((value) => includeBody = value);
-  }
-
-  @override
-  void dispose() {
-    _intentDataStreamSubscription.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
           PopupMenuButton<int>(
-            onSelected: (int result) {
-              switch (result) {
-                case 1:
-                  setState(() {
-                    includeFrontMatter = !includeFrontMatter;
-                  });
-                  setSettings("includeFrontMatter", includeFrontMatter);
-                  break;
-                case 2:
-                  setState(() {
-                    includeSourceLink = !includeSourceLink;
-                  });
-                  setSettings("includeSourceLink", includeSourceLink);
-                  break;
-                case 3:
-                  setState(() {
-                    includeExcerpt = !includeExcerpt;
-                  });
-                  setSettings("includeExcerpt", includeExcerpt);
-                  break;
-                case 4:
-                  setState(() {
-                    includeBody = !includeBody;
-                  });
-                  setSettings("includeBody", includeBody);
-                  break;
-              }
-            },
+            onSelected: _handleSettings,
             itemBuilder: (context) => [
               PopupMenuItem<int>(
                 child: CheckedPopupMenuItem(
@@ -256,57 +203,55 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<String> url2md(String url) async {
-    try {
-      String html = await _getHtmlText(url);
-      Map<Object?, Object?>? readableResults = await platform
-          .invokeMethod("makeReadable", {"html": html, "url": url});
-      var title = readableResults!["title"] as String;
-      var readable = readableResults["html"] as String;
-      var author = readableResults["author"] as String;
-      var excerpt = readableResults["excerpt"] as String;
-      var markdown = await getSettings("includeBody", defaultValue: true)
-          ? html2md.convert(readable, styleOptions: {
-              "headingStyle": "atx",
-              "hr": "---",
-              "bulletListMarker": "-",
-              "codeBlockStyle": "fenced",
-            })
-          : "";
-      var dateFmt = DateFormat("yyyy-MM-ddThh:mm:ss");
-      var formattedDate = dateFmt.format(DateTime.now());
-      var frontMatter = await getSettings("includeFrontMatter")
-          ? "---\ncreated: $formattedDate\nsource: $url\nauthor: $author\n---\n\n"
-          : "";
-      var link = await getSettings("includeSourceLink")
-          ? "Clipped from: $url\n\n"
-          : "";
-      var excerptString = await getSettings("includeExcerpt")
-          ? "## Excerpt\n\n> $excerpt\n\n"
-          : "";
-      return "$frontMatter# $title\n\n$link$excerptString$markdown";
-    } catch (e) {
-      Fluttertoast.showToast(msg: "$e");
-      return "";
+  void _handleSettings(int result) {
+    switch (result) {
+      case 1:
+        setState(() {
+          includeFrontMatter = !includeFrontMatter;
+        });
+        _setPreference("includeFrontMatter", includeFrontMatter);
+        break;
+      case 2:
+        setState(() {
+          includeSourceLink = !includeSourceLink;
+        });
+        _setPreference("includeSourceLink", includeSourceLink);
+        break;
+      case 3:
+        setState(() {
+          includeExcerpt = !includeExcerpt;
+        });
+        _setPreference("includeExcerpt", includeExcerpt);
+        break;
+      case 4:
+        setState(() {
+          includeBody = !includeBody;
+        });
+        _setPreference("includeBody", includeBody);
+        break;
     }
   }
 
-  Future<String> _getHtmlText(String url) async {
-    var response = await http.get(Uri.parse(url));
-    var rawBytes = response.bodyBytes;
-    try {
-      return utf8.decode(rawBytes);
-    } catch (_) {}
-    try {
-      return (await CharsetDetector.autoDecode(rawBytes)).string;
-    } catch (_) {}
-    if (response.headers.containsKey("content-type")) {
-      String ct = response.headers["content-type"]!;
-      if (ct.contains("charset")) {
-        var charset = ct.split("charset=")[1];
-        return await CharsetConverter.decode(charset, rawBytes);
-      }
-    }
-    throw Exception("Could not get text from the specified URL");
+  void _setPreference(String settingName, bool value) {
+    SharedPreferences.getInstance()
+        .then((prefs) => prefs.setBool(settingName, value));
+  }
+
+  void _convert() async {
+    var md = await _url2MdConverter.convert(url: url);
+    setState(() {
+      markdown = md;
+    });
+  }
+
+  void _share() {
+    Share.share(markdown);
+  }
+
+  void _toClipboard() {
+    Clipboard.setData(ClipboardData(text: markdown)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Copied to your clipboard!')));
+    });
   }
 }

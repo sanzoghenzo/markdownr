@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  build-mocks:
+    cmds:
+      - dart run build_runner build
+
+  test:
+    cmds:
+      - flutter test
+
+  lint:
+    cmds:
+      - dart format --set-exit-if-changed .
+      - flutter analyze
