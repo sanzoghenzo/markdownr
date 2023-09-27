@@ -55,7 +55,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<bool> getSettings(String settingName,
       {bool defaultValue = false}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(settingName) ?? defaultValue;
+    var retrievedValue = prefs.getBool(settingName);
+    if (retrievedValue == null) {
+      prefs.setBool(settingName, defaultValue);
+      return defaultValue;
+    }
+    return retrievedValue;
   }
 
   setSettings(String name, bool value) async {
@@ -260,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
       var readable = readableResults["html"] as String;
       var author = readableResults["author"] as String;
       var excerpt = readableResults["excerpt"] as String;
-      var markdown = await getSettings("includeBody")
+      var markdown = await getSettings("includeBody", defaultValue: true)
           ? html2md.convert(readable, styleOptions: {
               "headingStyle": "atx",
               "hr": "---",
