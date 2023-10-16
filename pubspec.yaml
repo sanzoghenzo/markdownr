@@ -14,7 +14,7 @@ dependencies:
   share_plus: ^7.1.0
   receive_sharing_intent: ^1.4.5
   fluttertoast: ^8.2.2
-  shared_preferences: ^2.0.18
+  shared_preferences: ^2.2.2
   flutter_charset_detector: ^1.0.2
   charset_converter: ^2.1.1
   flutter_markdown: ^0.6.18
