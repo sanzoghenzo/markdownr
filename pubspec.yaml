@@ -17,6 +17,7 @@ dependencies:
   shared_preferences: ^2.0.18
   flutter_charset_detector: ^1.0.2
   charset_converter: ^2.1.1
+  flutter_markdown: ^0.6.18
 
 dev_dependencies:
   flutter_test:

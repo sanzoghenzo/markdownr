@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:markdownr/converter.dart';
 import 'package:markdownr/httpclient.dart';
@@ -49,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   bool includeFrontMatter = false;
   bool includeExcerpt = false;
   bool includeBody = true;
+  bool showPreview = false;
   late final Url2MdConverter _url2MdConverter;
   late final SettingsRepository _settingsRepository;
 
@@ -81,6 +83,8 @@ class _HomePageState extends State<HomePage> {
       includeExcerpt = _settingsRepository.getBool("includeExcerpt");
       includeBody =
         _settingsRepository.getBool("includeBody", defaultValue: true);
+      showPreview =
+        _settingsRepository.getBool("showPreview");
     });
   }
 
@@ -138,6 +142,13 @@ class _HomePageState extends State<HomePage> {
                   value: 4,
                   child: const Text("Include Body"),
                 ),
+              ),
+              PopupMenuItem<int>(
+                child: CheckedPopupMenuItem(
+                  checked: showPreview,
+                  value: 5,
+                  child: const Text("Show Preview"),
+                ),
               )
             ],
           ),
@@ -162,10 +173,9 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical, //.horizontal
-                child: Text(
-                  markdown,
-                  softWrap: true,
-                ),
+                child: showPreview
+                    ? MarkdownBody(data: markdown)
+                    : Text(markdown, softWrap: true),
               ),
             ),
           ),
@@ -228,6 +238,12 @@ class _HomePageState extends State<HomePage> {
           includeBody = !includeBody;
         });
         _setPreference("includeBody", includeBody);
+        break;
+      case 5:
+        setState(() {
+          showPreview = !showPreview;
+        });
+        _setPreference("showPreview", showPreview);
         break;
     }
   }
