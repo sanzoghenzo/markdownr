@@ -28,7 +28,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
   }
 }
 
-Future<SharedPreferencesSettingsRepository> repoFactory() async{
+Future<SharedPreferencesSettingsRepository> repoFactory() async {
   var prefs = await SharedPreferences.getInstance();
   return SharedPreferencesSettingsRepository(prefs);
 }
