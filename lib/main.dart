@@ -70,21 +70,19 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    repoFactory().then((repo){
+    repoFactory().then((repo) {
       _settingsRepository = repo;
       _url2MdConverter = Url2MdConverter(
           httpClient: const DefaultHttpClient(),
           settingsRepository: _settingsRepository,
           notificationService: const DefaultNotificationService(),
-          readabilityService: DefaultReadabilityService()
-      );
+          readabilityService: DefaultReadabilityService());
       includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
       includeSourceLink = _settingsRepository.getBool("includeSourceLink");
       includeExcerpt = _settingsRepository.getBool("includeExcerpt");
       includeBody =
-        _settingsRepository.getBool("includeBody", defaultValue: true);
-      showPreview =
-        _settingsRepository.getBool("showPreview");
+          _settingsRepository.getBool("includeBody", defaultValue: true);
+      showPreview = _settingsRepository.getBool("showPreview");
     });
   }
 
