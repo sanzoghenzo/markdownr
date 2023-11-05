@@ -70,20 +70,22 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    repoFactory().then((repo) {
-      _settingsRepository = repo;
-      _url2MdConverter = Url2MdConverter(
-          httpClient: const DefaultHttpClient(),
-          settingsRepository: _settingsRepository,
-          notificationService: const DefaultNotificationService(),
-          readabilityService: DefaultReadabilityService());
-      includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
-      includeSourceLink = _settingsRepository.getBool("includeSourceLink");
-      includeExcerpt = _settingsRepository.getBool("includeExcerpt");
-      includeBody =
-          _settingsRepository.getBool("includeBody", defaultValue: true);
-      showPreview = _settingsRepository.getBool("showPreview");
-    });
+    repoFactory().then(initStateInternal);
+  }
+
+  void initStateInternal(SharedPreferencesSettingsRepository repo) {
+    _settingsRepository = repo;
+    _url2MdConverter = Url2MdConverter(
+        httpClient: const DefaultHttpClient(),
+        settingsRepository: _settingsRepository,
+        notificationService: const DefaultNotificationService(),
+        readabilityService: DefaultReadabilityService());
+    includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
+    includeSourceLink = _settingsRepository.getBool("includeSourceLink");
+    includeExcerpt = _settingsRepository.getBool("includeExcerpt");
+    includeBody =
+        _settingsRepository.getBool("includeBody", defaultValue: true);
+    showPreview = _settingsRepository.getBool("showPreview");
   }
 
   @override
@@ -94,6 +96,10 @@ class _HomePageState extends State<HomePage> {
 
   void fromIntent(String value) async {
     _controller.text = value;
+    if (_url2MdConverter == null) {
+      var repo = await repoFactory();
+      initStateInternal(repo);
+    }
     var md = await _url2MdConverter.convert(url: value);
     setState(() {
       url = value;
