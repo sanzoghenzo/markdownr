@@ -1,0 +1,3 @@
+Dark mode support
+Preview mode
+Update dependencies

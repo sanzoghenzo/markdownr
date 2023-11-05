@@ -24,21 +24,18 @@ I've written this app to save articles I found interesting to a note taking app 
 
 ## Developer info
 
-This started as a super simple app made in flutter, with only a single module.
+This app has been made possible thanks ti these wonderful libraries:
 
-It takes advantage of a few wonderful libraries:
-
-- `http`
 - `html2md`
-- `intl`
-- `share_plus`
+- `readability4J`
 - `receive_sharing_intent`
-- `fluttertoast`
+- `share_plus`
+- `flutter_markdown`
+- `http`
 - `shared_preferences`
+- `fluttertoast`
+- `intl`
 - `flutter_charset_detector`
 - `charset_converter`
-- `flutter_markdown`
 
-I just glued them up in a day, learning some Flutter in the meantime.
-
-In another day or so, I added `readability4J` kotlin package to the mix to cleanup the HTML before converting it to markdown.
+I just put them together in a really simple app.
