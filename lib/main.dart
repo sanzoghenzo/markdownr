@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   bool includeExcerpt = false;
   bool includeBody = true;
   bool showPreview = false;
-  late final Url2MdConverter _url2MdConverter;
+  late final Url2MdConverter? _url2MdConverter;
   late final SettingsRepository _settingsRepository;
 
   _HomePageState();
@@ -100,10 +100,10 @@ class _HomePageState extends State<HomePage> {
       var repo = await repoFactory();
       initStateInternal(repo);
     }
-    var md = await _url2MdConverter.convert(url: value);
+    var md = await _url2MdConverter?.convert(url: value);
     setState(() {
       url = value;
-      markdown = md;
+      markdown = md!;
     });
     if (markdown.isNotEmpty) {
       Share.share(markdown);
@@ -258,9 +258,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _convert() async {
-    var md = await _url2MdConverter.convert(url: url);
+    var md = await _url2MdConverter?.convert(url: url);
     setState(() {
-      markdown = md;
+      markdown = md!;
     });
   }
 
