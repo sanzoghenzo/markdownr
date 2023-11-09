@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   bool includeExcerpt = false;
   bool includeBody = true;
   bool showPreview = false;
+  MarkdownArticle? article;
   late final Url2MdConverter? _url2MdConverter;
   late final SettingsRepository _settingsRepository;
 
@@ -42,8 +43,8 @@ class _HomePageState extends State<HomePage> {
     // share intent received while running
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen(fromIntent, onError: (err) {
-          Fluttertoast.showToast(msg: "Error receiving the intent: $err");
-        });
+      Fluttertoast.showToast(msg: "Error receiving the intent: $err");
+    });
 
     // share intent received while closed
     ReceiveSharingIntent.getInitialText().then((String? value) async {
@@ -61,7 +62,6 @@ class _HomePageState extends State<HomePage> {
     _settingsRepository = repo;
     _url2MdConverter = Url2MdConverter(
         httpClient: const DefaultHttpClient(),
-        settingsRepository: _settingsRepository,
         notificationService: const DefaultNotificationService(),
         readabilityService: DefaultReadabilityService());
     includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
@@ -84,11 +84,11 @@ class _HomePageState extends State<HomePage> {
       var repo = await repoFactory();
       initStateInternal(repo);
     }
-    var md = await _url2MdConverter?.convert(url: value);
     setState(() {
       url = value;
-      markdown = md!;
     });
+    article = await _url2MdConverter?.convertPage(url: value);
+    _updateMarkdown();
     if (markdown.isNotEmpty) {
       Share.share(markdown);
     }
@@ -158,63 +158,63 @@ class _HomePageState extends State<HomePage> {
 
   Padding _buildUrlInput() {
     return Padding(
-          padding: const EdgeInsets.all(16),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Enter a URL',
-            ),
-            onChanged: (value) {
-              url = value;
-            },
-            controller: _controller,
-          ),
-        );
+      padding: const EdgeInsets.all(16),
+      child: TextField(
+        decoration: const InputDecoration(
+          hintText: 'Enter a URL',
+        ),
+        onChanged: (value) {
+          url = value;
+        },
+        controller: _controller,
+      ),
+    );
   }
 
   Expanded _buildMarkdownView() {
     return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical, //.horizontal
-              child: showPreview
-                  ? MarkdownBody(data: markdown)
-                  : Text(markdown, softWrap: true),
-            ),
-          ),
-        );
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical, //.horizontal
+          child: showPreview
+              ? MarkdownBody(data: markdown)
+              : Text(markdown, softWrap: true),
+        ),
+      ),
+    );
   }
 
   Row _buildButtonsRow() {
     return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Column(
           children: <Widget>[
-            Column(
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: _convert,
-                  child: const Text('CONVERT'),
-                ),
-              ],
-            ),
-            Column(
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: markdown.isNotEmpty ? _share : null,
-                  child: const Text('SHARE'),
-                ),
-              ],
-            ),
-            Column(
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: markdown.isNotEmpty ? _toClipboard : null,
-                  child: const Text('COPY'),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: _convert,
+              child: const Text('CONVERT'),
             ),
           ],
-        );
+        ),
+        Column(
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: markdown.isNotEmpty ? _share : null,
+              child: const Text('SHARE'),
+            ),
+          ],
+        ),
+        Column(
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: markdown.isNotEmpty ? _toClipboard : null,
+              child: const Text('COPY'),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   void _handleSettings(int result) {
@@ -237,6 +237,7 @@ class _HomePageState extends State<HomePage> {
           break;
       }
     });
+    _updateMarkdown();
   }
 
   bool _togglePreference(String settingName) {
@@ -246,9 +247,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _convert() async {
-    var md = await _url2MdConverter?.convert(url: url);
+    article = await _url2MdConverter?.convertPage(url: url);
+    _updateMarkdown();
+  }
+
+  void _updateMarkdown() {
+    var title = article!.title;
+    var body = includeBody ? article!.content : "";
+    var frontMatter = includeFrontMatter ? article!.frontMatter : "";
+    var link = includeSourceLink ? article!.sourceLinkSection : "";
+    var excerpt = includeExcerpt ? article!.excerptSection : "";
     setState(() {
-      markdown = md!;
+      markdown = "$frontMatter# $title\n\n$link$excerpt$body";
     });
   }
 
