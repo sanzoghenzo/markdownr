@@ -11,7 +11,6 @@ import 'package:markdownr/readability.dart';
 import 'package:markdownr/settings.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -40,12 +39,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // share intent received while running
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen(fromIntent, onError: (err) {
           Fluttertoast.showToast(msg: "Error receiving the intent: $err");
         });
 
+    // share intent received while closed
     ReceiveSharingIntent.getInitialText().then((String? value) async {
+      var repo = await repoFactory();
+      initStateInternal(repo);
       if (value != null && value.isNotEmpty) {
         fromIntent(value);
       }
@@ -94,148 +97,152 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          PopupMenuButton<int>(
-            onSelected: _handleSettings,
-            itemBuilder: (context) => [
-              PopupMenuItem<int>(
-                child: CheckedPopupMenuItem(
-                  checked: includeFrontMatter,
-                  value: 1,
-                  child: const Text("Include front matter"),
-                ),
-              ),
-              PopupMenuItem<int>(
-                child: CheckedPopupMenuItem(
-                  checked: includeSourceLink,
-                  value: 2,
-                  child: const Text("Include URL in content"),
-                ),
-              ),
-              PopupMenuItem<int>(
-                child: CheckedPopupMenuItem(
-                  checked: includeExcerpt,
-                  value: 3,
-                  child: const Text("Include Excerpt"),
-                ),
-              ),
-              PopupMenuItem<int>(
-                child: CheckedPopupMenuItem(
-                  checked: includeBody,
-                  value: 4,
-                  child: const Text("Include Body"),
-                ),
-              ),
-              PopupMenuItem<int>(
-                child: CheckedPopupMenuItem(
-                  checked: showPreview,
-                  value: 5,
-                  child: const Text("Show Preview"),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Enter a URL',
-              ),
-              onChanged: (value) {
-                url = value;
-              },
-              controller: _controller,
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical, //.horizontal
-                child: showPreview
-                    ? MarkdownBody(data: markdown)
-                    : Text(markdown, softWrap: true),
-              ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: _convert,
-                    child: const Text('CONVERT'),
-                  ),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: markdown.isNotEmpty ? _share : null,
-                    child: const Text('SHARE'),
-                  ),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: markdown.isNotEmpty ? _toClipboard : null,
-                    child: const Text('COPY'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _buildUrlInput(),
+          _buildMarkdownView(),
+          _buildButtonsRow(),
         ],
       ),
     );
   }
 
-  void _handleSettings(int result) {
-    switch (result) {
-      case 1:
-        setState(() {
-          includeFrontMatter = !includeFrontMatter;
-        });
-        _setPreference("includeFrontMatter", includeFrontMatter);
-        break;
-      case 2:
-        setState(() {
-          includeSourceLink = !includeSourceLink;
-        });
-        _setPreference("includeSourceLink", includeSourceLink);
-        break;
-      case 3:
-        setState(() {
-          includeExcerpt = !includeExcerpt;
-        });
-        _setPreference("includeExcerpt", includeExcerpt);
-        break;
-      case 4:
-        setState(() {
-          includeBody = !includeBody;
-        });
-        _setPreference("includeBody", includeBody);
-        break;
-      case 5:
-        setState(() {
-          showPreview = !showPreview;
-        });
-        _setPreference("showPreview", showPreview);
-        break;
-    }
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Text(widget.title),
+      actions: [
+        PopupMenuButton<int>(
+          onSelected: _handleSettings,
+          itemBuilder: (context) => [
+            PopupMenuItem<int>(
+              child: CheckedPopupMenuItem(
+                checked: includeFrontMatter,
+                value: 1,
+                child: const Text("Include front matter"),
+              ),
+            ),
+            PopupMenuItem<int>(
+              child: CheckedPopupMenuItem(
+                checked: includeSourceLink,
+                value: 2,
+                child: const Text("Include URL in content"),
+              ),
+            ),
+            PopupMenuItem<int>(
+              child: CheckedPopupMenuItem(
+                checked: includeExcerpt,
+                value: 3,
+                child: const Text("Include Excerpt"),
+              ),
+            ),
+            PopupMenuItem<int>(
+              child: CheckedPopupMenuItem(
+                checked: includeBody,
+                value: 4,
+                child: const Text("Include Body"),
+              ),
+            ),
+            PopupMenuItem<int>(
+              child: CheckedPopupMenuItem(
+                checked: showPreview,
+                value: 5,
+                child: const Text("Show Preview"),
+              ),
+            )
+          ],
+        ),
+      ],
+    );
   }
 
-  void _setPreference(String settingName, bool value) {
-    SharedPreferences.getInstance()
-        .then((prefs) => prefs.setBool(settingName, value));
+  Padding _buildUrlInput() {
+    return Padding(
+          padding: const EdgeInsets.all(16),
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Enter a URL',
+            ),
+            onChanged: (value) {
+              url = value;
+            },
+            controller: _controller,
+          ),
+        );
+  }
+
+  Expanded _buildMarkdownView() {
+    return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical, //.horizontal
+              child: showPreview
+                  ? MarkdownBody(data: markdown)
+                  : Text(markdown, softWrap: true),
+            ),
+          ),
+        );
+  }
+
+  Row _buildButtonsRow() {
+    return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: _convert,
+                  child: const Text('CONVERT'),
+                ),
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: markdown.isNotEmpty ? _share : null,
+                  child: const Text('SHARE'),
+                ),
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: markdown.isNotEmpty ? _toClipboard : null,
+                  child: const Text('COPY'),
+                ),
+              ],
+            ),
+          ],
+        );
+  }
+
+  void _handleSettings(int result) {
+    setState(() {
+      switch (result) {
+        case 1:
+          includeFrontMatter = _togglePreference("includeFrontMatter");
+          break;
+        case 2:
+          includeSourceLink = _togglePreference("includeSourceLink");
+          break;
+        case 3:
+          includeExcerpt = _togglePreference("includeExcerpt");
+          break;
+        case 4:
+          includeBody = _togglePreference("includeBody");
+          break;
+        case 5:
+          showPreview = _togglePreference("showPreview");
+          break;
+      }
+    });
+  }
+
+  bool _togglePreference(String settingName) {
+    var newValue = !_settingsRepository.getBool(settingName);
+    _settingsRepository.setBool(settingName, newValue);
+    return newValue;
   }
 
   void _convert() async {
