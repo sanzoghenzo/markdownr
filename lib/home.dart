@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   late StreamSubscription _intentDataStreamSubscription;
   String url = "";
   String markdown = "";
+  String markdownPreview = "";
   bool includeSourceLink = false;
   bool includeFrontMatter = false;
   bool includeExcerpt = false;
@@ -178,7 +179,7 @@ class _HomePageState extends State<HomePage> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical, //.horizontal
           child: showPreview
-              ? MarkdownBody(data: markdown)
+              ? MarkdownBody(data: markdownPreview)
               : Text(markdown, softWrap: true),
         ),
       ),
@@ -259,6 +260,7 @@ class _HomePageState extends State<HomePage> {
     var excerpt = includeExcerpt ? article!.excerptSection : "";
     setState(() {
       markdown = "$frontMatter# $title\n\n$link$excerpt$body";
+      markdownPreview = "# $title\n\n$link$excerpt$body";
     });
   }
 
