@@ -8,15 +8,16 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  static const title = 'Markdownr';
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Markdownr',
+      title: title,
       theme: ThemeData(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
-      home: const HomePage(title: 'Markdownr'),
+      home: const HomePage(title: title),
     );
   }
 }
