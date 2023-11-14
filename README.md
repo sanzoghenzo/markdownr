@@ -8,6 +8,9 @@ I've written this app to save articles I found interesting to a note taking app 
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.sanzoghenzo.markdownr/)
 
+![markdownr-from-intent-small](https://github.com/sanzoghenzo/markdownr/assets/977953/091d07a1-f917-4a57-b70c-72f9aa088c6e) 
+![markdownr-options-small](https://github.com/sanzoghenzo/markdownr/assets/977953/6108ab52-540c-4c41-9889-8b59244eee3b)
+
 ## Features
 
 - Downloads the web page specified in the URL input field, cleans it up (like readability does) and converts it to Markdown.
