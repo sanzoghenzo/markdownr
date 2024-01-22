@@ -8,7 +8,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.5
-  http: ^1.1.0
+  http: ^1.2.0
   html2md: ^1.2.5
   intl: ^0.18.1
   share_plus: ^6.3.1
