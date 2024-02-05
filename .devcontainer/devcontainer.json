@@ -1,0 +1,23 @@
+{
+    "name": "Flutter",
+    "build": {"dockerfile": "Dockerfile"},
+    "features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": false,
+            "installOhMyZsh": false,
+			"username": "vscode",
+			"userUid": "1000",
+			"userGid": "1000",
+			"upgradePackages": true
+		},
+		"ghcr.io/devcontainers/features/git:1": {
+            "version": "latest",
+            "ppa": false
+        }
+	},
+    "customizations": {
+        "vscode": {"extensions": ["dart-code.dart-code", "dart-code.flutter"]}
+    },
+    "runArgs": ["--device", "/dev/bus", "-v", "/dev/bus/usb:/dev/bus/usb"],
+    "remoteUser": "vscode"
+}
