@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdownr/converter.dart';
 import 'package:markdownr/httpclient.dart';
@@ -14,6 +15,8 @@ import 'package:mockito/mockito.dart';
 import 'converter_test.mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Url2MdConverter', () {
     late MockHttpClient mockHttpClient;
     late MockNotificationService mockNotificationService;
@@ -31,26 +34,6 @@ void main() {
       );
     });
 
-    test('convert should return valid markdown', () async {
-      const url = 'https://example.com';
-      const content = '<h2>Test Header</h2><p>Test paragraph</p>';
-      const html =
-          '<html><head><title>Test Title</title></head><body>$content</body></html>';
-      when(mockHttpClient.getPage(url)).thenAnswer((_) async => html);
-      when(mockReadabilityService.makeReadable(html, url)).thenAnswer(
-          (_) async => const ReadabilityOutput(
-              content: '<div>$content</div>',
-              title: "Test Title",
-              author: "Myself",
-              excerpt: "A really good article"));
-      final markdown = await url2mdConverter.convertPage(url: url);
-      expect(markdown.url, url);
-      expect(markdown.content, "## Test Header\n\nTest paragraph");
-      expect(markdown.title, "Test Title");
-      expect(markdown.author, "Myself");
-      expect(markdown.excerpt, "A really good article");
-    });
-
     test('convert should handle exceptions', () async {
       const url = 'https://example.com';
       when(mockHttpClient.getPage(url)).thenThrow(Exception());
@@ -61,5 +44,30 @@ void main() {
       expect(markdown.author, "");
       expect(markdown.excerpt, "");
     });
+
+    void fileBasedTestCase(fileName) {
+      test('Convert case $fileName', () async {
+        const url = "https://www.example.com";
+        final file = File('test/resources/$fileName.html');
+        var content = await file.readAsString();
+        final html =
+            '<html><head><title>Title</title></head><body>$content</body></html>';
+        when(mockHttpClient.getPage(url)).thenAnswer((_) async => html);
+        when(mockReadabilityService.makeReadable(html, url)).thenAnswer(
+            (_) async => ReadabilityOutput(
+                content: content,
+                title: "Title",
+                author: "Author",
+                excerpt: "A really good article"));
+        final markdown = await url2mdConverter.convertPage(url: url);
+        final mdFile = File('test/resources/$fileName.md');
+        var mdContent = await mdFile.readAsString();
+        expect(markdown.content, mdContent);
+      });
+    }
+
+    fileBasedTestCase('simple');
+    fileBasedTestCase('jekyll-code-block');
+    fileBasedTestCase('jekyll-code-block-no-language');
   });
 }

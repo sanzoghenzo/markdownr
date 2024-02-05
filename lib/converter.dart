@@ -53,16 +53,15 @@ class Url2MdConverter {
         "hr": "---",
         "bulletListMarker": "-",
         "codeBlockStyle": "fenced",
-      });
-      var title = readableResults.title;
-      var author = readableResults.author;
-      var excerpt = readableResults.excerpt;
+      }, rules: [
+        jeckyllRule
+      ]);
       return MarkdownArticle(
           url: url,
           content: markdown,
-          title: title,
-          author: author,
-          excerpt: excerpt,
+          title: readableResults.title,
+          author: readableResults.author,
+          excerpt: readableResults.excerpt,
           creationDate: formattedDate);
     } catch (e) {
       _notificationService.showToast("$e");
@@ -75,4 +74,32 @@ class Url2MdConverter {
           creationDate: formattedDate);
     }
   }
+
+  html2md.Rule jeckyllRule = html2md.Rule('jekyll-codeblocks',
+      filterFn: (node) => node.nodeName == 'code' && node.parentElName == 'pre',
+      replacement: (content, node) {
+        var language = getLanguage(node);
+        var content = node.childNodes().map((e) => e.textContent).join();
+        return '\n\n```$language\n$content\n```\n\n';
+      });
+}
+
+String getLanguage(node) {
+  var regex = RegExp(r'language-(\S+)');
+  var className = node.firstChild!.className;
+  var languageMatched = regex.firstMatch(className)?.group(1);
+  if (languageMatched != null) {
+    return languageMatched;
+  }
+  var nodeElement = node.asElement();
+  while (nodeElement.parent != null) {
+    nodeElement = nodeElement.parent;
+    for (var className in nodeElement.classes) {
+      languageMatched = regex.firstMatch(className)?.group(1);
+      if (languageMatched != null) {
+        return languageMatched;
+      }
+    }
+  }
+  return '';
 }
