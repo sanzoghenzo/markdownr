@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
           scrollDirection: Axis.vertical, //.horizontal
           child: showPreview
               ? MarkdownBody(data: markdownPreview)
-              : Text(markdown, softWrap: true),
+              : SelectableText(markdown),
         ),
       ),
     );
