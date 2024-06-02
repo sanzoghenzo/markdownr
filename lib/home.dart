@@ -42,18 +42,18 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     // share intent received while running
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen(fromIntent, onError: (err) {
+    _intentDataStreamSubscription = ReceiveSharingIntent.instance
+        .getMediaStream()
+        .listen(fromIntent, onError: (err) {
       Fluttertoast.showToast(msg: "Error receiving the intent: $err");
     });
 
     // share intent received while closed
-    ReceiveSharingIntent.getInitialText().then((String? value) async {
+    ReceiveSharingIntent.instance.getInitialMedia().then((value) async {
       var repo = await repoFactory();
       initStateInternal(repo);
-      if (value != null && value.isNotEmpty) {
-        fromIntent(value);
-      }
+      fromIntent(value);
+      ReceiveSharingIntent.instance.reset();
     });
 
     repoFactory().then(initStateInternal);
@@ -79,16 +79,23 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void fromIntent(String value) async {
-    _controller.text = value;
+  void fromIntent(List<SharedMediaFile> value) async {
+    if (value.isEmpty) {
+      return;
+    }
+    var urlValue = value.singleOrNull?.path;
+    if (urlValue == null || urlValue.isEmpty) {
+      return;
+    }
+    _controller.text = urlValue;
     if (_url2MdConverter == null) {
       var repo = await repoFactory();
       initStateInternal(repo);
     }
     setState(() {
-      url = value;
+      url = urlValue;
     });
-    article = await _url2MdConverter?.convertPage(url: value);
+    article = await _url2MdConverter?.convertPage(url: urlValue);
     _updateMarkdown();
     if (markdown.isNotEmpty) {
       Share.share(markdown);
