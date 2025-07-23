@@ -4,6 +4,7 @@ publish_to: 'none'
 version: 1.6.0+12
 environment:
   sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.32.0 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -11,12 +12,12 @@ dependencies:
   http: ^1.1.0
   html2md: ^1.3.1
   intl: ^0.18.1
-  share_plus: ^6.3.1
-  receive_sharing_intent: ^1.8.0
-  fluttertoast: ^8.2.2
+  share_plus: ^11.0.0
+  receive_sharing_intent: ^1.8.1
+  fluttertoast: ^8.2.12
   shared_preferences: ^2.2.2
-  flutter_charset_detector: ^2.0.0
-  charset_converter: ^2.1.1
+  flutter_charset_detector: ^5.0.0
+  charset_converter: ^2.3.0
   flutter_markdown: ^0.6.18
 
 dev_dependencies:

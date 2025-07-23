@@ -23,15 +23,11 @@ if (flutterVersionName == null) {
 }
 
 android {
-    compileSdkVersion 34
+    namespace "com.sanzoghenzo.markdownr"
+    compileSdkVersion 35
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
+    kotlin {
+        jvmToolchain(17)
     }
 
     sourceSets {
@@ -48,6 +44,10 @@ android {
 
     buildTypes {
         release {
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), 
+                "proguard-rules.txt",
+            )
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
@@ -60,6 +60,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     implementation "net.dankito.readability4j:readability4j:1.0.8"
 }
