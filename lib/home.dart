@@ -104,14 +104,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: Column(
-        children: <Widget>[
-          _buildUrlInput(),
-          _buildMarkdownView(),
-          _buildButtonsRow(),
-        ],
+    return SafeArea(
+      child: Container(
+        constraints: const BoxConstraints.expand(),
+        alignment: Alignment.center,
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: Column(
+            children: <Widget>[
+              _buildUrlInput(),
+              _buildMarkdownView(),
+              _buildButtonsRow(),
+            ],
+          ),
+        ),
       ),
     );
   }
