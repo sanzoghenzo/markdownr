@@ -278,8 +278,11 @@ class _HomePageState extends State<HomePage> {
 
   void _toClipboard() {
     Clipboard.setData(ClipboardData(text: markdown)).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Copied to your clipboard!')));
+      if (context.mounted) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Copied to your clipboard!')));
+      }
     });
   }
 }
