@@ -1,0 +1,3 @@
+Fix race condition when reading shared link
+Handle Android 15 edge-to-edge rendering
+Update Dependencies, Kotlin, Gradle and AGP
