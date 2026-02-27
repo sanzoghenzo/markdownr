@@ -54,11 +54,13 @@ void main() {
             '<html><head><title>Title</title></head><body>$content</body></html>';
         when(mockHttpClient.getPage(url)).thenAnswer((_) async => html);
         when(mockReadabilityService.makeReadable(html, url)).thenAnswer(
-            (_) async => ReadabilityOutput(
-                content: content,
-                title: "Title",
-                author: "Author",
-                excerpt: "A really good article"));
+          (_) async => ReadabilityOutput(
+            content: content,
+            title: "Title",
+            author: "Author",
+            excerpt: "A really good article",
+          ),
+        );
         final markdown = await url2mdConverter.convertPage(url: url);
         final mdFile = File('test/resources/$fileName.md');
         var mdContent = await mdFile.readAsString();

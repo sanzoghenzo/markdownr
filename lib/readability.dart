@@ -31,8 +31,10 @@ class DefaultReadabilityService implements ReadabilityService {
   @override
   Future<ReadabilityOutput> makeReadable(String html, String url) async {
     const platform = MethodChannel("com.sanzoghenzo/readability");
-    var readableResults =
-        await platform.invokeMethod("makeReadable", {"html": html, "url": url});
+    var readableResults = await platform.invokeMethod("makeReadable", {
+      "html": html,
+      "url": url,
+    });
     if (readableResults == null) {
       throw AssertionError("Readability couldn't parse the HTML");
     }

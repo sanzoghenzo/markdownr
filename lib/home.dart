@@ -44,11 +44,13 @@ class _HomePageState extends State<HomePage> {
       var repo = await repoFactory();
       initStateInternal(repo);
       // share intent received while running
-      _intentDataStreamSubscription = ReceiveSharingIntent.instance
-          .getMediaStream()
-          .listen(fromIntent, onError: (err) {
-        Fluttertoast.showToast(msg: "Error receiving the intent: $err");
-      });
+      _intentDataStreamSubscription =
+          ReceiveSharingIntent.instance.getMediaStream().listen(
+        fromIntent,
+        onError: (err) {
+          Fluttertoast.showToast(msg: "Error receiving the intent: $err");
+        },
+      );
 
       // share intent received while closed
       ReceiveSharingIntent.instance.getInitialMedia().then((value) async {
@@ -61,14 +63,17 @@ class _HomePageState extends State<HomePage> {
   void initStateInternal(SharedPreferencesSettingsRepository repo) {
     _settingsRepository = repo;
     _url2MdConverter = Url2MdConverter(
-        httpClient: const DefaultHttpClient(),
-        notificationService: const DefaultNotificationService(),
-        readabilityService: DefaultReadabilityService());
+      httpClient: const DefaultHttpClient(),
+      notificationService: const DefaultNotificationService(),
+      readabilityService: DefaultReadabilityService(),
+    );
     includeFrontMatter = _settingsRepository.getBool("includeFrontMatter");
     includeSourceLink = _settingsRepository.getBool("includeSourceLink");
     includeExcerpt = _settingsRepository.getBool("includeExcerpt");
-    includeBody =
-        _settingsRepository.getBool("includeBody", defaultValue: true);
+    includeBody = _settingsRepository.getBool(
+      "includeBody",
+      defaultValue: true,
+    );
     showPreview = _settingsRepository.getBool("showPreview");
   }
 
@@ -158,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                 value: 5,
                 child: const Text("Show Preview"),
               ),
-            )
+            ),
           ],
         ),
       ],
@@ -169,9 +174,7 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
-        decoration: const InputDecoration(
-          hintText: 'Enter a URL',
-        ),
+        decoration: const InputDecoration(hintText: 'Enter a URL'),
         controller: _controller,
       ),
     );
@@ -197,10 +200,7 @@ class _HomePageState extends State<HomePage> {
       children: <Widget>[
         Column(
           children: <Widget>[
-            ElevatedButton(
-              onPressed: _convert,
-              child: const Text('CONVERT'),
-            ),
+            ElevatedButton(onPressed: _convert, child: const Text('CONVERT')),
           ],
         ),
         Column(
@@ -270,10 +270,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _share() {
-    SharePlus.instance.share(ShareParams(
-      text: markdown,
-      subject: article!.title,
-    ));
+    SharePlus.instance.share(
+      ShareParams(text: markdown, subject: article!.title),
+    );
   }
 
   void _toClipboard() {
@@ -281,7 +280,8 @@ class _HomePageState extends State<HomePage> {
       if (context.mounted) {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Copied to your clipboard!')));
+          const SnackBar(content: Text('Copied to your clipboard!')),
+        );
       }
     });
   }

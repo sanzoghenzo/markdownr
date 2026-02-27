@@ -24,13 +24,8 @@ import 'package:mockito/mockito.dart' as _i1;
 
 class _FakeReadabilityOutput_0 extends _i1.SmartFake
     implements _i2.ReadabilityOutput {
-  _FakeReadabilityOutput_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeReadabilityOutput_0(Object parent, Invocation parentInvocation)
+      : super(parent, parentInvocation);
 }
 
 /// A class which mocks [HttpClient].
@@ -39,10 +34,7 @@ class _FakeReadabilityOutput_0 extends _i1.SmartFake
 class MockHttpClient extends _i1.Mock implements _i3.HttpClient {
   @override
   _i4.Future<String> getPage(String? url) => (super.noSuchMethod(
-        Invocation.method(
-          #getPage,
-          [url],
-        ),
+        Invocation.method(#getPage, [url]),
         returnValue: _i4.Future<String>.value(''),
         returnValueForMissingStub: _i4.Future<String>.value(''),
       ) as _i4.Future<String>);
@@ -54,32 +46,15 @@ class MockHttpClient extends _i1.Mock implements _i3.HttpClient {
 class MockSettingsRepository extends _i1.Mock
     implements _i5.SettingsRepository {
   @override
-  bool getBool(
-    String? name, {
-    bool? defaultValue = false,
-  }) =>
+  bool getBool(String? name, {bool? defaultValue = false}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #getBool,
-          [name],
-          {#defaultValue: defaultValue},
-        ),
+        Invocation.method(#getBool, [name], {#defaultValue: defaultValue}),
         returnValue: false,
         returnValueForMissingStub: false,
       ) as bool);
   @override
-  _i4.Future<void> setBool(
-    String? name,
-    bool? value,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #setBool,
-          [
-            name,
-            value,
-          ],
-        ),
+  _i4.Future<void> setBool(String? name, bool? value) => (super.noSuchMethod(
+        Invocation.method(#setBool, [name, value]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
@@ -92,10 +67,7 @@ class MockNotificationService extends _i1.Mock
     implements _i6.NotificationService {
   @override
   dynamic showToast(String? message) => super.noSuchMethod(
-        Invocation.method(
-          #showToast,
-          [message],
-        ),
+        Invocation.method(#showToast, [message]),
         returnValueForMissingStub: null,
       );
 }
@@ -106,39 +78,20 @@ class MockNotificationService extends _i1.Mock
 class MockReadabilityService extends _i1.Mock
     implements _i2.ReadabilityService {
   @override
-  _i4.Future<_i2.ReadabilityOutput> makeReadable(
-    String? html,
-    String? url,
-  ) =>
+  _i4.Future<_i2.ReadabilityOutput> makeReadable(String? html, String? url) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #makeReadable,
-          [
-            html,
-            url,
-          ],
+        Invocation.method(#makeReadable, [html, url]),
+        returnValue: _i4.Future<_i2.ReadabilityOutput>.value(
+          _FakeReadabilityOutput_0(
+            this,
+            Invocation.method(#makeReadable, [html, url]),
+          ),
         ),
-        returnValue:
-            _i4.Future<_i2.ReadabilityOutput>.value(_FakeReadabilityOutput_0(
-          this,
-          Invocation.method(
-            #makeReadable,
-            [
-              html,
-              url,
-            ],
+        returnValueForMissingStub: _i4.Future<_i2.ReadabilityOutput>.value(
+          _FakeReadabilityOutput_0(
+            this,
+            Invocation.method(#makeReadable, [html, url]),
           ),
-        )),
-        returnValueForMissingStub:
-            _i4.Future<_i2.ReadabilityOutput>.value(_FakeReadabilityOutput_0(
-          this,
-          Invocation.method(
-            #makeReadable,
-            [
-              html,
-              url,
-            ],
-          ),
-        )),
+        ),
       ) as _i4.Future<_i2.ReadabilityOutput>);
 }

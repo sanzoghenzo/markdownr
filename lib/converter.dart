@@ -48,40 +48,46 @@ class Url2MdConverter {
     try {
       var html = await _httpClient.getPage(url);
       var readableResults = await _readabilityService.makeReadable(html, url);
-      var markdown = html2md.convert(readableResults.content, styleOptions: {
-        "headingStyle": "atx",
-        "hr": "---",
-        "bulletListMarker": "-",
-        "codeBlockStyle": "fenced",
-      }, rules: [
-        jeckyllRule
-      ]);
+      var markdown = html2md.convert(
+        readableResults.content,
+        styleOptions: {
+          "headingStyle": "atx",
+          "hr": "---",
+          "bulletListMarker": "-",
+          "codeBlockStyle": "fenced",
+        },
+        rules: [jeckyllRule],
+      );
       return MarkdownArticle(
-          url: url,
-          content: markdown,
-          title: readableResults.title,
-          author: readableResults.author,
-          excerpt: readableResults.excerpt,
-          creationDate: formattedDate);
+        url: url,
+        content: markdown,
+        title: readableResults.title,
+        author: readableResults.author,
+        excerpt: readableResults.excerpt,
+        creationDate: formattedDate,
+      );
     } catch (e) {
       _notificationService.showToast("$e");
       return MarkdownArticle(
-          url: url,
-          content: "",
-          title: "",
-          author: "",
-          excerpt: "",
-          creationDate: formattedDate);
+        url: url,
+        content: "",
+        title: "",
+        author: "",
+        excerpt: "",
+        creationDate: formattedDate,
+      );
     }
   }
 
-  html2md.Rule jeckyllRule = html2md.Rule('jekyll-codeblocks',
-      filterFn: (node) => node.nodeName == 'code' && node.parentElName == 'pre',
-      replacement: (content, node) {
-        var language = getLanguage(node);
-        var content = node.childNodes().map((e) => e.textContent).join();
-        return '\n\n```$language\n$content\n```\n\n';
-      });
+  html2md.Rule jeckyllRule = html2md.Rule(
+    'jekyll-codeblocks',
+    filterFn: (node) => node.nodeName == 'code' && node.parentElName == 'pre',
+    replacement: (content, node) {
+      var language = getLanguage(node);
+      var content = node.childNodes().map((e) => e.textContent).join();
+      return '\n\n```$language\n$content\n```\n\n';
+    },
+  );
 }
 
 String getLanguage(node) {
