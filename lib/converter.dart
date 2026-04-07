@@ -90,7 +90,7 @@ class Url2MdConverter {
   );
 }
 
-String getLanguage(node) {
+String getLanguage(html2md.Node node) {
   var regex = RegExp(r'language-(\S+)');
   var className = node.firstChild!.className;
   var languageMatched = regex.firstMatch(className)?.group(1);
@@ -98,9 +98,9 @@ String getLanguage(node) {
     return languageMatched;
   }
   var nodeElement = node.asElement();
-  while (nodeElement.parent != null) {
+  while (nodeElement!.parent != null) {
     nodeElement = nodeElement.parent;
-    for (var className in nodeElement.classes) {
+    for (var className in nodeElement!.classes) {
       languageMatched = regex.firstMatch(className)?.group(1);
       if (languageMatched != null) {
         return languageMatched;

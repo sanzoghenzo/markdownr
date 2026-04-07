@@ -33,7 +33,7 @@ This app has been made possible thanks ti these wonderful libraries:
 - `readability4J`
 - `receive_sharing_intent`
 - `share_plus`
-- `flutter_markdown`
+- `flutter_markdown_plus`
 - `http`
 - `shared_preferences`
 - `fluttertoast`

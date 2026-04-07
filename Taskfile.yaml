@@ -1,15 +1,46 @@
-version: '3'
+version: "3"
+
+vars:
+  PHONE_IP: 192.168.1.70
 
 tasks:
+  default:
+    aliases: [help]
+    desc: list all the tasks
+    cmds:
+      - task --list-all
+
   build-mocks:
+    desc: Build test mocks
     cmds:
       - dart run build_runner build
 
   test:
+    desc: Run tests
     cmds:
-      - flutter test
+      - flutter test --no-test-assets --coverage
+      - flutter pub run test_cov_console
 
   lint:
+    desc: format and analyze the code
     cmds:
       - dart format --set-exit-if-changed .
       - flutter analyze
+
+  build:
+    desc: build android apk
+    cmds:
+      - flutter build apk
+
+  adb-wifi:
+    desc: set up adb connection via Wi-Fi. Make sure the phone is connected via USB.
+    cmds:
+      - adb tcpip ${PHONE_IP}
+      # - adb connect ${PHONE_IP}
+      # - echo "You can now disconnect the USB cable."
+
+  debug:
+    desc: Debug the app on an adb connected phone
+    cmds:
+      # - adb connect ${PHONE_IP}
+      - flutter run
